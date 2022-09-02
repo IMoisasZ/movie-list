@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:movie_list_app/domain/models/movie.dart';
-import 'package:movie_list_app/services/movie_servie.dart';
+import '../view_models/home_view_model.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
 
-  MovieService service = MovieService();
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final viewModel = HomeViewModel();
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel.getMovies();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('Lista de Filmes - ${service.currentPage}'),
+          title: Text('Lista de Filmes'),
           centerTitle: true
       ),
       body: StreamBuilder<List<Movie>>(
-        stream: service.streamController.stream,
+        stream: viewModel.streamController.stream,
         builder: (context, snapshot) {
           if(snapshot.hasData) {
             return ListView.builder(
@@ -41,13 +52,12 @@ class HomePage extends StatelessWidget {
                       leading: Image.network('https://image.tmdb.org/t/p/w500${movie.backdropPath}'),
                     );
                   }else {
-                    service.loadMore();
+                    viewModel.getMovies();
                     return const Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10.0),
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   }
-
                 },
             );
           }
@@ -56,6 +66,4 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-
 }
